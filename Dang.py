@@ -2,6 +2,8 @@
 import requests
 import time, re, json
 from lxml import etree
+import bar
+
 #=====some const========
 Home = "http://192.168.8.119/"
 log_in = "http://192.168.8.119/login"
@@ -9,6 +11,7 @@ Base = "http://192.168.8.119/ol/"
 Refresh = "http://192.168.8.119/ol/studycourse/update"
 Finish = "http://192.168.8.119/ol/studycourse/finish"
 Check = "http://192.168.8.119/ol/studycourse/check"
+Keep_alive = 245.0 #in second
 #====================
 def _(string):
 	if isinstance(string, unicode): 
@@ -57,13 +60,17 @@ def Ref(Sess, Addr, Len):
 	Count = 0
 	for i in range(Len):
 		Sess.get(Addr).status_code
-		end = time.time()+245
+		end = time.time()+Keep_alive
 		Sess.get(Refresh)
 		print "[%s]"%time.ctime(),_("四分钟后刷新，请稍候……"),_("已刷%s次，还剩%s次"%(Count, (Len-Count)))
+		S = bar.SimpleProgressBar()
+		S.update(100*(1-float(end-time.time())/Keep_alive))
 		while time.time() < end:
 			time.sleep(0.25)
+			S.update(100*(1-float(end-time.time())/Keep_alive))
+		S.update(100*(1-float(end-time.time())/Keep_alive))
 		Sess.get(Finish)
-		print "[%s]"%time.ctime(),_("一次刷课结束\n")
+		print "\n[%s]"%time.ctime(),_("一次刷课结束\n")
 		Count+=1
 def Num(Arr):
 	res = []
